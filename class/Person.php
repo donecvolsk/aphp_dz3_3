@@ -1,64 +1,47 @@
 <?php
 declare(strict_types=1);
 
-//проверка и печать данных регистрации пользователяя полученных из вне
-class Person
-{
-    public string $name;
-    public string $surname;
-    public int $age;
-    public array $arrayPerson = []; //массив имя фамилия
-    public $arrayPerson_string;
-
-    //добавление имени фамилии в массив
-    public function addPerdson(string $name, string $surname)
-    {
+class Person {
+    private string $name;
+    private int $age;
+    private string $login;
+    
+    public function __construct(string $name, int $age, string $login) {
         $this->name = $name;
-        $this->surname = $surname;
-        $this->arrayPerson[] = $this->name;
-        $this->arrayPerson[] = $this->surname;
+        $this->age = $age;
+        $this->login = $login;
     }
 
-    //добавление возраста в массив
-    public function __set($name, int $value)
-    {
-        $this->age = $value;
-        $this->arrayPerson[] = $this->age;
+    // Магический метод для получения свойств
+    public function __get($property) {
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        } else {
+            throw new Exception("Свойство '$property' не существует.");
+        }
     }
 
-    //вывод массива в консоль
-    public function __get($name)
-    {
-        var_dump($this->arrayPerson);
-        echo PHP_EOL;
+    // Магический метод для установки значений свойств
+    public function __set($property, $value) {
+        if (property_exists($this, $property)) {
+            $this->$property = $value;
+        } else {
+            throw new Exception("Свойство '$property' не существует.");
+        }
     }
 
-    public function __sleep()
-    {
-        return array('name', 'age');   
+    // Метод для преобразования объекта в строку
+    public function __toString() {
+        return "Имя: {$this->name}, Возраст: {$this->age}, Логин: {$this->login}";
     }
 
-    //сериализация массива в строку
-    public function serializedStr()
-    {
-        $this->arrayPerson_string = serialize($this->arrayPerson);
-        echo $this->arrayPerson_string . ' - строка сериализованного массива' . PHP_EOL;
+    // Метод для сериализации объекта
+    public function __sleep() {
+        return ['name', 'age', 'login'];
     }
 
-    //замена возраста в строке
-    public function ageСhange($newAge)
-    {
-        $this->arrayPerson_string = str_replace("48", $newAge, $this->arrayPerson_string);
-        echo $this->arrayPerson_string . ' - строка сериализованного массив после изменения возраста' . PHP_EOL;
-        echo PHP_EOL;
+    // Метод для восстановления состояния после десериализации
+    public function __wakeup() {
+        echo "Объект восстановлен.\n\n";
     }
-
-     //сериализация массива в строку
-     public function unserializedStr()
-     {
-        $this->arrayPerson = unserialize($this->arrayPerson_string);
-        echo 'массив после десириализации:' .  PHP_EOL;
-        var_dump($this->arrayPerson);
-     }
-
 }
